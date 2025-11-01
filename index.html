@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-M" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký suất ăn - Mầm non 24/3</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#14b8a6"/>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-192.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Configure Tailwind to use the 'class' strategy for dark mode
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Be Vietnam Pro', sans-serif;
+      }
+      .fade-in {
+        animation: fadeIn 0.3s ease-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .toast-item {
+        animation: slideInRight 0.5s forwards;
+      }
+      @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+      }
+      .highlight-update {
+        animation: highlight-fade 2.5s ease-out;
+      }
+      @keyframes highlight-fade {
+        0% { background-color: rgba(20, 184, 172, 0.3); }
+        100% { background-color: transparent; }
+      }
+      .highlight-user-class {
+        animation: highlight-user-row 3s ease-out;
+      }
+      @keyframes highlight-user-row {
+          0%, 10% { background-color: rgba(20, 184, 172, 0.4); }
+          100% { background-color: transparent; }
+      }
+      
+      /* Modal and Dropdown animations */
+      .modal-content, .dropdown-content {
+        animation: scaleIn 0.2s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
+      }
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95) translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      /* Ripple Effect */
+      .ripple-effect {
+        position: relative;
+        overflow: hidden;
+        /* H-TRANSFORM-GPU for better performance on mobile */
+        transform: translate3d(0, 0, 0);
+      }
+      .ripple {
+        display: block;
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(0);
+        animation: ripple-animation 600ms linear;
+        pointer-events: none;
+      }
+      @keyframes ripple-animation {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      /* Table Row Transitions */
+      .table-row-item {
+        animation: slideFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+      }
+      @keyframes slideFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+      }
+      
+      /* Hide spin buttons on number inputs */
+      input[type=number]::-webkit-inner-spin-button,
+      input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+      
+      /* Micro-interactions & Accessibility Improvements */
+      /* Add a subtle press-down effect on active buttons for better feedback */
+      button:active:not(:disabled), [role="button"]:active:not(:disabled) {
+        transform: scale(0.98);
+        transition: transform 0.1s;
+      }
+
+      /* Enhance focus visibility for keyboard users */
+      *:focus-visible {
+        outline: 2px solid #2dd4bf !important; /* A bright teal outline */
+        outline-offset: 2px !important;
+        border-radius: 4px; /* Optional: adds rounded corners to the outline */
+      }
+
+      /* Add padding to the bottom of the main content and mobile nav when the offline banner is visible */
+      main.pb-offline-banner {
+        padding-bottom: 7rem; /* Adjust based on nav + banner height */
+      }
+      .mobile-nav.pb-offline-banner {
+        bottom: 32px; /* Height of the offline indicator */
+      }
+
+      /* Utility to hide scrollbars */
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "jspdf": "https://aistudiocdn.com/jspdf@^2.5.1",
+    "jspdf-autotable": "https://aistudiocdn.com/jspdf-autotable@^3.8.2",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.4.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <script>
+      // IIFE to set theme before React loads to prevent FOUC
+      (function() {
+        try {
+          const theme = localStorage.getItem('theme');
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          console.error('Could not set theme from localStorage', e);
+        }
+      })();
+
+      // Ripple Effect Handler
+      (function() {
+          const createRipple = (event) => {
+              const button = event.currentTarget;
+              if (!button) return;
+
+              button.classList.add('ripple-effect');
+              const circle = document.createElement("span");
+              const diameter = Math.max(button.clientWidth, button.clientHeight);
+              const radius = diameter / 2;
+              circle.style.width = circle.style.height = `${diameter}px`;
+              circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+              circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+              circle.classList.add("ripple");
+              
+              const existingRipple = button.querySelector(".ripple");
+              if (existingRipple) {
+                  existingRipple.remove();
+              }
+              button.appendChild(circle);
+          };
+
+          const applyRippleToElement = (element) => {
+              if (element.matches('button, [role="button"]')) {
+                  element.removeEventListener("click", createRipple); // Prevent duplicate listeners
+                  element.addEventListener("click", createRipple);
+              }
+          };
+
+          const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                  if (mutation.type === 'childList') {
+                      mutation.addedNodes.forEach((node) => {
+                          if (node.nodeType === Node.ELEMENT_NODE) {
+                              const el = node;
+                              applyRippleToElement(el);
+                              el.querySelectorAll('button, [role="button"]').forEach(applyRippleToElement);
+                          }
+                      });
+                  }
+              });
+          });
+          
+          observer.observe(document.body, { childList: true, subtree: true });
+          
+          // Initial scan
+          document.querySelectorAll('button, [role="button"]').forEach(applyRippleToElement);
+      })();
+      
+      // Register Service Worker for PWA
+      // Only register the service worker if it's in a production-like environment (not the AI Studio iframe)
+      if ('serviceWorker' in navigator && !window.location.hostname.includes('usercontent.goog')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js').then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
