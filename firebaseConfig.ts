@@ -6,19 +6,27 @@ import { initializeFirestore, persistentLocalCache, Firestore } from "firebase/f
 import { getAuth } from "firebase/auth";
 
 // =================================================================================================
-// QUAN TRỌNG: THAY THẾ CÁC GIÁ TRỊ DƯỚI ĐÂY BẰNG CẤU HÌNH DỰ ÁN FIREBASE CỦA BẠN
-// Bạn có thể lấy thông tin này từ Console của Firebase:
-// Project settings > General > Your apps > Firebase SDK snippet > Config
+// Cấu hình Firebase giờ đây sẽ được đọc từ Biến môi trường (Environment Variables)
+// trên nền tảng hosting (Vercel). Điều này giúp bảo mật thông tin nhạy cảm.
+// Khi deploy, bạn cần thiết lập các biến này trong cài đặt dự án trên Vercel.
 // =================================================================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDLjmEvxFN77cZoAgutIbfcSnpYZLvwynA",
-  authDomain: "project-6402338388925710253.firebaseapp.com",
-  projectId: "project-6402338388925710253",
-  storageBucket: "project-6402338388925710253.firebasestorage.app",
-  messagingSenderId: "888042239100",
-  appId: "1:888042239100:web:0d363fa4d3de2f4960c5f9",
-  measurementId: "G-L3R6D8TVPY"
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID,
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID
 };
+
+
+// Kiểm tra xem các biến môi trường đã được cấu hình hay chưa
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error("Firebase config is not set. Please check your environment variables.");
+  // You might want to render an error message to the user here
+  // For now, we will proceed, but Firebase will likely fail to initialize.
+}
 
 // Khởi tạo Firebase
 const app: FirebaseApp = initializeApp(firebaseConfig);
