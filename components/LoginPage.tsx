@@ -1,6 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FirebaseError } from 'firebase/app';
+import FirebaseConfigError from './FirebaseConfigError';
 
 const LoadingSpinner: React.FC = () => (
     <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -31,16 +32,21 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isConfigError, setIsConfigError] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
+        setIsConfigError(false);
         setIsLoading(true);
         try {
             await signInWithEmail(email, password);
             // On successful login, onAuthStateChanged in context will handle the rest
         } catch (err: any) {
-            if (err instanceof FirebaseError) {
+             // Check for specific 403 Forbidden error from the network layer
+            if (err.message && (err.message.includes('403') || err.message.toLowerCase().includes('forbidden'))) {
+                setIsConfigError(true);
+            } else if (err instanceof FirebaseError) {
                 setError(getFriendlyAuthError(err.code));
             } else {
                 setError('Đã xảy ra lỗi khi đăng nhập.');
@@ -69,59 +75,63 @@ const LoginPage: React.FC = () => {
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Địa chỉ email
-                            </label>
-                            <div className="mt-1">
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white dark:bg-gray-700 dark:text-white"
-                                />
+                    {isConfigError ? (
+                        <FirebaseConfigError projectId="project-6402338388925710253" />
+                    ) : (
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Địa chỉ email
+                                </label>
+                                <div className="mt-1">
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <label htmlFor="password"className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Mật khẩu
-                            </label>
-                            <div className="mt-1">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white dark:bg-gray-700 dark:text-white"
-                                />
+                            <div>
+                                <label htmlFor="password"className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Mật khẩu
+                                </label>
+                                <div className="mt-1">
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        autoComplete="current-password"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        {error && (
-                            <div role="alert" aria-live="assertive" className="text-red-600 dark:text-red-400 text-sm p-3 bg-red-50 dark:bg-red-900/50 rounded-md">
-                                {error}
+                            {error && (
+                                <div role="alert" aria-live="assertive" className="text-red-600 dark:text-red-400 text-sm p-3 bg-red-50 dark:bg-red-900/50 rounded-md">
+                                    {error}
+                                </div>
+                            )}
+
+                            <div>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-teal-400 dark:disabled:bg-teal-800 disabled:cursor-wait"
+                                >
+                                    {isLoading ? <LoadingSpinner /> : 'Đăng nhập'}
+                                </button>
                             </div>
-                        )}
-
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-teal-400 dark:disabled:bg-teal-800 disabled:cursor-wait"
-                            >
-                                {isLoading ? <LoadingSpinner /> : 'Đăng nhập'}
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    )}
                 </div>
             </div>
         </div>
