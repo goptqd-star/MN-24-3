@@ -6,26 +6,36 @@ import { initializeFirestore, persistentLocalCache, Firestore } from "firebase/f
 import { getAuth } from "firebase/auth";
 
 // =================================================================================================
-// Cấu hình Firebase giờ đây sẽ được đọc từ Biến môi trường (Environment Variables)
-// trên nền tảng hosting (Vercel). Điều này giúp bảo mật thông tin nhạy cảm.
-// Khi deploy, bạn cần thiết lập các biến này trong cài đặt dự án trên Vercel.
+// Cấu hình Firebase sẽ ưu tiên sử dụng Biến môi trường (Environment Variables) khi được deploy.
+// Nếu không tìm thấy, nó sẽ sử dụng các giá trị dự phòng bên dưới để phát triển cục bộ.
+// Điều này giúp ứng dụng hoạt động ở cả môi trường phát triển và sản phẩm mà không bị lỗi.
 // =================================================================================================
+
+const FALLBACK_CONFIG = {
+  apiKey: "AIzaSyDLjmEvxFN77cZoAgutIbfcSnpYZLvwynA",
+  authDomain: "project-6402338388925710253.firebaseapp.com",
+  projectId: "project-6402338388925710253",
+  storageBucket: "project-6402338388925710253.appspot.com",
+  messagingSenderId: "888042239100",
+  appId: "1:888042239100:web:0d363fa4d3de2f4960c5f9",
+  measurementId: "G-L3R6D8TVPY"
+};
+
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_API_KEY,
-  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_APP_ID,
-  measurementId: process.env.REACT_APP_MEASUREMENT_ID
+  apiKey: process.env.REACT_APP_API_KEY || FALLBACK_CONFIG.apiKey,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN || FALLBACK_CONFIG.authDomain,
+  projectId: process.env.REACT_APP_PROJECT_ID || FALLBACK_CONFIG.projectId,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET || FALLBACK_CONFIG.storageBucket,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID || FALLBACK_CONFIG.messagingSenderId,
+  appId: process.env.REACT_APP_APP_ID || FALLBACK_CONFIG.appId,
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID || FALLBACK_CONFIG.measurementId
 };
 
 
-// Kiểm tra xem các biến môi trường đã được cấu hình hay chưa
+// Kiểm tra xem các biến môi trường và giá trị dự phòng có bị thiếu không
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error("Firebase config is not set. Please check your environment variables.");
-  // You might want to render an error message to the user here
-  // For now, we will proceed, but Firebase will likely fail to initialize.
+  console.error("Firebase config is not set. Please check your environment variables or the fallback config in firebaseConfig.ts.");
+  alert("Lỗi cấu hình Firebase. Ứng dụng không thể khởi động. Vui lòng liên hệ quản trị viên.");
 }
 
 // Khởi tạo Firebase
