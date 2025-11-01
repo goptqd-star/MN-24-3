@@ -6,19 +6,23 @@ import { initializeFirestore, persistentLocalCache, Firestore } from "firebase/f
 import { getAuth } from "firebase/auth";
 
 // =================================================================================================
-// Cấu hình Firebase sẽ ưu tiên sử dụng Biến môi trường (Environment Variables) khi được deploy.
-// Nếu không tìm thấy, nó sẽ sử dụng các giá trị dự phòng bên dưới để phát triển cục bộ.
-// Điều này giúp ứng dụng hoạt động ở cả môi trường phát triển và sản phẩm mà không bị lỗi.
+// LƯU Ý BẢO MẬT QUAN TRỌNG
+// Tệp này đã an toàn để đưa lên một kho chứa GitHub công khai.
+// Các khóa API thật đã được thay thế bằng các chuỗi giữ chỗ (placeholder).
+// Khi deploy lên Vercel, các khóa API sẽ được cung cấp thông qua Biến môi trường an toàn.
+// TUYỆT ĐỐI KHÔNG ĐƯA KHÓA API THẬT VÀO ĐÂY VÀ ĐẨY LÊN GITHUB.
 // =================================================================================================
 
 const FALLBACK_CONFIG = {
-  apiKey: "AIzaSyDLjmEvxFN77cZoAgutIbfcSnpYZLvwynA",
-  authDomain: "project-6402338388925710253.firebaseapp.com",
-  projectId: "project-6402338388925710253",
-  storageBucket: "project-6402338388925710253.appspot.com",
-  messagingSenderId: "888042239100",
-  appId: "1:888042239100:web:0d363fa4d3de2f4960c5f9",
-  measurementId: "G-L3R6D8TVPY"
+  // Để chạy ứng dụng cục bộ (local development), bạn có thể tạm thời thay thế
+  // các chuỗi giữ chỗ này bằng khóa API thật của mình. Nhưng đừng commit thay đổi đó.
+  apiKey: "ADD_YOUR_API_KEY_HERE_FOR_LOCAL_DEVELOPMENT",
+  authDomain: "ADD_YOUR_AUTH_DOMAIN_HERE_FOR_LOCAL_DEVELOPMENT",
+  projectId: "ADD_YOUR_PROJECT_ID_HERE_FOR_LOCAL_DEVELOPMENT",
+  storageBucket: "ADD_YOUR_STORAGE_BUCKET_HERE_FOR_LOCAL_DEVELOPMENT",
+  messagingSenderId: "ADD_YOUR_MESSAGING_SENDER_ID_HERE_FOR_LOCAL_DEVELOPMENT",
+  appId: "ADD_YOUR_APP_ID_HERE_FOR_LOCAL_DEVELOPMENT",
+  measurementId: "ADD_YOUR_MEASUREMENT_ID_HERE_FOR_LOCAL_DEVELOPMENT"
 };
 
 const firebaseConfig = {
@@ -32,10 +36,13 @@ const firebaseConfig = {
 };
 
 
-// Kiểm tra xem các biến môi trường và giá trị dự phòng có bị thiếu không
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error("Firebase config is not set. Please check your environment variables or the fallback config in firebaseConfig.ts.");
-  alert("Lỗi cấu hình Firebase. Ứng dụng không thể khởi động. Vui lòng liên hệ quản trị viên.");
+// Kiểm tra xem cấu hình có hợp lệ không trước khi khởi tạo
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId || firebaseConfig.apiKey.startsWith("ADD_YOUR")) {
+  console.error("Firebase config is not set. Please check your environment variables (for production) or the fallback config in firebaseConfig.ts (for local development).");
+  // Thông báo cho người dùng cuối nếu ứng dụng không thể khởi động
+  if (!window.location.hostname.includes('usercontent.goog')) {
+    alert("Lỗi cấu hình Firebase. Ứng dụng không thể khởi động. Vui lòng liên hệ quản trị viên.");
+  }
 }
 
 // Khởi tạo Firebase
